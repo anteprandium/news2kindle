@@ -1,0 +1,4 @@
+http://1ucasvb.tumblr.com/rss
+http://feeds.feedburner.com/InformationIsBeautiful
+http://feeds.howtogeek.com/HowToGeek
+http://planet.python.org/rss10.xml
