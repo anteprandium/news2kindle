@@ -4,26 +4,18 @@
 # idea and original code from from from https://gist.github.com/alexwlchan/01cec115a6f51d35ab26
 
 # PYTHON boilerplate
-from subprocess import Popen, PIPE
 from email.utils import COMMASPACE, formatdate
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import smtplib
-import codecs
 import sys
 import pypandoc
-import feedparser
-import shutil
 import pytz
 import time
 from datetime import datetime, timedelta
-import collections
 import os
-import inspect
-import threading
-from dotenv import load_dotenv
-load_dotenv()
+from FeedparserThread import FeedparserThread
 
 EMAIL_SMTP = os.getenv("EMAIL_SMTP")
 EMAIL_USER = os.getenv("EMAIL_USER")
@@ -38,21 +30,7 @@ FEED_FILE = os.path.join(CONFIG_PATH, 'feeds.txt')
 COVER_FILE = os.path.join(CONFIG_PATH, 'cover.png')
 
 
-root_folder = os.path.realpath(os.path.abspath(os.path.split(
-    inspect.getfile(inspect.currentframe()))[0]))
-this_file = os.path.realpath(os.path.abspath(inspect.getfile(
-    inspect.currentframe())))
 feed_file = os.path.expanduser(FEED_FILE)
-
-
-Post = collections.namedtuple('Post', [
-    'time',
-    'blog',
-    'title',
-    'author',
-    'link',
-    'body'
-])
 
 
 def load_feeds():
@@ -79,81 +57,6 @@ def get_start(fname):
     the timestamp of the feeds file.
     """
     return pytz.utc.localize(datetime.fromtimestamp(os.path.getmtime(fname)))
-
-
-def process_entry(entry, blog, START):
-    """
-    Coerces an entry from feedparser into a Post tuple.
-    Returns None if the entry should be excluded.
-
-    If it was published before START date, drop the entry.
-    """
-    try:
-        when = entry['updated_parsed']
-    except KeyError:
-        try:
-            when = entry['published_parsed']
-        except KeyError:
-            return  # Ignore undateable posts
-
-    if when:
-        when = pytz.utc.localize(datetime.fromtimestamp(time.mktime(when)))
-    else:
-        # print blog, entry
-        return
-
-    if when < START:
-        return
-
-    title = entry.get('title', "Null")
-
-    try:
-        author = entry['author']
-    except KeyError:
-        try:
-            author = ', '.join(a['name'] for a in entry.get('authors', []))
-        except KeyError:
-            author = 'Anonymous'
-
-    link = entry['link']
-
-    try:
-        body = entry['content'][0]['value']
-    except KeyError:
-        body = entry['summary']
-
-    return Post(when, blog, title, author, link, body)
-
-
-class FeedparserThread(threading.Thread):
-    """
-    Each one of these threads will get the task of opening one feed
-    and process its entries.
-
-    Given an url, starting time and a global list, this thread will
-    add new posts to the global list, after processing.
-
-    """
-
-    def __init__(self, url, START, posts):
-        threading.Thread.__init__(self)
-        self.url = url
-        self.START = START
-        self.posts = posts
-        self.myposts = []
-
-    def run(self):
-        feed = feedparser.parse(self.url)
-        try:
-            blog = feed['feed']['title']
-        except KeyError:
-            blog = "---"
-        for entry in feed['entries']:
-            post = process_entry(entry, blog, self.START)
-            if post:
-                self.myposts.append(post)
-        self.myposts.sort()
-        self.posts += self.myposts
 
 
 def get_posts_list(feed_list, START):
@@ -242,8 +145,6 @@ def send_mail(send_from, send_to, subject, text, files):
     smtp.login(EMAIL_USER, EMAIL_PASSWD)
     smtp.sendmail(send_from, send_to, msg.as_string())
     smtp.quit()
-    # p = Popen(["/usr/sbin/sendmail", "-t", "-oi"], stdin=PIPE)
-    # p.communicate(msg.as_string())
 
 
 def do_one_round():
@@ -252,7 +153,6 @@ def do_one_round():
     start = get_start(feed_file)
 
     print(f"Collecting posts since {start}")
-    sys.stdout.flush()
 
     posts = get_posts_list(load_feeds(), start)
     posts.sort()
@@ -271,12 +171,12 @@ def do_one_round():
         os.environ['PYPANDOC_PANDOC'] = PANDOC
         ofile = 'dailynews.epub'
         pypandoc.convert_text(result,
-                         to='epub3',
-                         format="html",
-                         outputfile=ofile,
-                         extra_args=["--standalone",
+                              to='epub3',
+                              format="html",
+                              outputfile=ofile,
+                              extra_args=["--standalone",
                                           f"--epub-cover-image={COVER_FILE}",
-                                     ])
+                                          ])
 
         print("Sending to kindle email")
 
