@@ -2,7 +2,7 @@
 
 `news2kindle` is a little Python script, based on code from `https://gist.github.com/alexwlchan/01cec115a6f51d35ab26` will read a list of RSS news, package them as a MOBI file, and then send it to your kindle via kindle mail address and Amazon's whispersync. 
 
-This script is intended for “know-how” users, if any of the above puzzles you, you're probably not the intended audience.
+This script is intended for "know-how" users, if any of the above puzzles you, you're probably not the intended audience.
 
 
 *Caveat*: If your MOBI file gets bigger than 25MB (easy if  you have a lot of RSS sources), amazon will refuse to whispersync to your device. Can't do anything about it.
@@ -17,19 +17,12 @@ Then, it will sleep for twelve hours (adjustable) and do it all over again. The 
 
 
 ## Installation
-Also, you'll need several things for this to work:
 
-* From the Python side:
-    * `pytz`,
-    * `pypandoc`, and 
-    * `feedparser`.
-    
-(You can `pip install` all of these. Actually, you can just install them under the directory where you will store this script, with `pip install -t . pytz pypandoc feedparser` and be done with it.)
+Change into the cloned github repo and execute following docker commands:
 
-* Programs:
-    * [`pandoc`](http://pandoc.org), if not bundled with `pypandoc` above, and
-    * [`kindlegen`](https://www.amazon.com/gp/feature.html?docId=1000765211).
-    
-then, configure the first part of the file with appropriate mail server, user, password, fee file and paths. Finaly, just run the script.
+```
+docker build -t news2kindle .
+docker run --env-file <path/to/env/file> news2kindle
+```
 
-Good luck.
+where the `.env` file contains all the environment variables defined in [news2kindle.py](src/news2kindle.py).
