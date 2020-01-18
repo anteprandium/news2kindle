@@ -183,11 +183,11 @@ def do_one_round():
 
         logging.info("Sending to kindle email")
 
-        # send_mail(send_from=EMAIL_FROM,
-        #           send_to=[KINDLE_EMAIL],
-        #           subject="Daily News",
-        #           text="This is your daily news.\n\n--\n\n",
-        #           files=[ofile])
+        send_mail(send_from=EMAIL_FROM,
+                  send_to=[KINDLE_EMAIL],
+                  subject="Daily News",
+                  text="This is your daily news.\n\n--\n\n",
+                  files=[ofile])
         logging.info("Cleaning up.")
         os.remove(ofile)
 
