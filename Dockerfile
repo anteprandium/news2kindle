@@ -1,8 +1,10 @@
-FROM python:3.8.0-alpine3.10
+FROM python:3.8-buster
 
-COPY src/requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 
-RUN pip3 install -r requirements.txt
+RUN apt-get update \
+    && apt-get install -y pandoc \
+    && pip3 install -r requirements.txt
 
 COPY src/ src/
 COPY config/ config/
