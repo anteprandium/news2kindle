@@ -32,8 +32,10 @@ EMAIL_FROM = os.getenv("EMAIL_FROM")
 KINDLE_EMAIL = os.getenv("KINDLE_EMAIL")
 PANDOC = os.getenv("PANDOC_PATH", "/usr/bin/pandoc")
 PERIOD = int(os.getenv("UPDATE_PERIOD", 12))  # hours between RSS pulls
-KINDLE_GEN = './kindlegen'
-FEED_FILE = '/config/feeds.txt'
+
+CONFIG_PATH = '/config'
+FEED_FILE = os.path.join(CONFIG_PATH, 'feeds.txt')
+COVER_FILE = os.path.join(CONFIG_PATH, 'cover.png')
 
 
 root_folder = os.path.realpath(os.path.abspath(os.path.split(
@@ -41,8 +43,6 @@ root_folder = os.path.realpath(os.path.abspath(os.path.split(
 this_file = os.path.realpath(os.path.abspath(inspect.getfile(
     inspect.currentframe())))
 feed_file = os.path.expanduser(FEED_FILE)
-
-# end boilerplate
 
 
 Post = collections.namedtuple('Post', [
@@ -261,48 +261,34 @@ def do_one_round():
 
     if posts:
         print("Compiling newspaper")
-        sys.stdout.flush()
 
         result = html_head + \
             u"\n".join([html_perpost.format(**nicepost(post))
                         for post in posts]) + html_tail
 
-        # with codecs.open('dailynews.html', 'w', 'utf-8') as f:
-        #     f.write(result)
-
         print("Creating epub")
-        sys.stdout.flush()
 
         os.environ['PYPANDOC_PANDOC'] = PANDOC
-        ofile = "dailynews.epub"
-        oofile = "dailynews.mobi"
-        pypandoc.convert(result,
+        ofile = 'dailynews.epub'
+        pypandoc.convert_text(result,
                          to='epub3',
                          format="html",
                          outputfile=ofile,
                          extra_args=["--standalone",
-                                     "--epub-cover-image=cover.png",
+                                          f"--epub-cover-image={COVER_FILE}",
                                      ])
 
-        print("Converting to kindle")
-        sys.stdout.flush()
-        os.system(f"{KINDLE_GEN} {ofile} -o {oofile} >/dev/null 2>&1")
-
         print("Sending to kindle email")
-        sys.stdout.flush()
 
         send_mail(send_from=EMAIL_FROM,
                   send_to=[KINDLE_EMAIL],
                   subject="Daily News",
                   text="This is your daily news.\n\n--\n\n",
-                  files=[oofile])
+                  files=[ofile])
         print("Cleaning up.")
-        sys.stdout.flush()
         os.remove(ofile)
-        os.remove(oofile)
 
     print("Finished.")
-    sys.stdout.flush()
     update_start(now)
 
 
