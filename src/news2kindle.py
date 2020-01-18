@@ -13,9 +13,12 @@ import sys
 import pypandoc
 import pytz
 import time
+import logging
 from datetime import datetime, timedelta
 import os
 from FeedparserThread import FeedparserThread
+
+logging.basicConfig(level=logging.INFO)
 
 EMAIL_SMTP = os.getenv("EMAIL_SMTP")
 EMAIL_USER = os.getenv("EMAIL_USER")
@@ -152,21 +155,21 @@ def do_one_round():
     now = pytz.utc.localize(datetime.now())
     start = get_start(feed_file)
 
-    print(f"Collecting posts since {start}")
+    logging.info(f"Collecting posts since {start}")
 
     posts = get_posts_list(load_feeds(), start)
     posts.sort()
 
-    print(f"Downloaded {len(posts)} posts")
+    logging.info(f"Downloaded {len(posts)} posts")
 
     if posts:
-        print("Compiling newspaper")
+        logging.info("Compiling newspaper")
 
         result = html_head + \
             u"\n".join([html_perpost.format(**nicepost(post))
                         for post in posts]) + html_tail
 
-        print("Creating epub")
+        logging.info("Creating epub")
 
         os.environ['PYPANDOC_PANDOC'] = PANDOC
         ofile = 'dailynews.epub'
@@ -178,17 +181,17 @@ def do_one_round():
                                           f"--epub-cover-image={COVER_FILE}",
                                           ])
 
-        print("Sending to kindle email")
+        logging.info("Sending to kindle email")
 
-        send_mail(send_from=EMAIL_FROM,
-                  send_to=[KINDLE_EMAIL],
-                  subject="Daily News",
-                  text="This is your daily news.\n\n--\n\n",
-                  files=[ofile])
-        print("Cleaning up.")
+        # send_mail(send_from=EMAIL_FROM,
+        #           send_to=[KINDLE_EMAIL],
+        #           subject="Daily News",
+        #           text="This is your daily news.\n\n--\n\n",
+        #           files=[ofile])
+        logging.info("Cleaning up.")
         os.remove(ofile)
 
-    print("Finished.")
+    logging.info("Finished.")
     update_start(now)
 
 
