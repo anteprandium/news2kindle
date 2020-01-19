@@ -14,6 +14,8 @@ import pypandoc
 import pytz
 import time
 import logging
+import threading
+import subprocess
 from datetime import datetime, timedelta
 import os
 from FeedparserThread import FeedparserThread
@@ -21,6 +23,7 @@ from FeedparserThread import FeedparserThread
 logging.basicConfig(level=logging.INFO)
 
 EMAIL_SMTP = os.getenv("EMAIL_SMTP")
+EMAIL_SMTP_PORT = int(os.getenv("EMAIL_SMTP_PORT"))
 EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_PASSWD = os.getenv("EMAIL_PASSWORD")
 EMAIL_FROM = os.getenv("EMAIL_FROM")
@@ -142,12 +145,16 @@ def send_mail(send_from, send_to, subject, text, files):
                 Content_Disposition=f'attachment; filename="{os.path.basename(f)}"',
                 Name=os.path.basename(f)
             ))
-
-    smtp = smtplib.SMTP_SSL()
-    smtp.connect(EMAIL_SMTP)
+    smtp = smtplib.SMTP_SSL(EMAIL_SMTP, EMAIL_SMTP_PORT)
     smtp.login(EMAIL_USER, EMAIL_PASSWD)
     smtp.sendmail(send_from, send_to, msg.as_string())
     smtp.quit()
+
+
+def convert_to_mobi(input_file, output_file):
+    cmd = ['ebook-convert', input_file, output_file]
+    process = subprocess.Popen(cmd)
+    process.wait()
 
 
 def do_one_round():
@@ -171,25 +178,28 @@ def do_one_round():
 
         logging.info("Creating epub")
 
+        epubFile = 'dailynews.epub'
+        mobiFile = 'dailynews.mobi'
+
         os.environ['PYPANDOC_PANDOC'] = PANDOC
-        ofile = 'dailynews.epub'
         pypandoc.convert_text(result,
                               to='epub3',
                               format="html",
-                              outputfile=ofile,
+                              outputfile=epubFile,
                               extra_args=["--standalone",
                                           f"--epub-cover-image={COVER_FILE}",
                                           ])
+        convert_to_mobi(epubFile, mobiFile)
 
         logging.info("Sending to kindle email")
-
         send_mail(send_from=EMAIL_FROM,
                   send_to=[KINDLE_EMAIL],
                   subject="Daily News",
                   text="This is your daily news.\n\n--\n\n",
-                  files=[ofile])
-        logging.info("Cleaning up.")
-        os.remove(ofile)
+                  files=[mobiFile])
+        logging.info("Cleaning up...")
+        os.remove(epubFile)
+        os.remove(mobiFile)
 
     logging.info("Finished.")
     update_start(now)
