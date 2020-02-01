@@ -1,5 +1,3 @@
-move.sh
-kindlegen
-pandoc
-pypandoc
-feedparser.py
+.env
+docker-compose.yaml
+__pycache__
