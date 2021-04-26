@@ -208,4 +208,4 @@ def do_one_round():
 if __name__ == '__main__':
     while True:
         do_one_round()
-        time.sleep(PERIOD*60)
+        time.sleep(PERIOD*3600)
