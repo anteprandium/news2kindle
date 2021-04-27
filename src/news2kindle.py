@@ -60,9 +60,9 @@ def update_start(now):
 def get_start(fname):
     """
     Get the starting time to read posts since. This is currently saved as 
-    the timestamp of the feeds file.
+    the time of last RSS pulls.
     """
-    return pytz.utc.localize(datetime.fromtimestamp(os.path.getmtime(fname)))
+    return pytz.utc.localize(datetime.now() - timedelta(hours = PERIOD))
 
 
 def get_posts_list(feed_list, START):
