@@ -30,7 +30,7 @@ EMAIL_FROM = os.getenv("EMAIL_FROM")
 KINDLE_EMAIL = os.getenv("KINDLE_EMAIL")
 PANDOC = os.getenv("PANDOC_PATH", "/usr/bin/pandoc")
 PERIOD = int(os.getenv("UPDATE_PERIOD", 12))  # hours between RSS pulls
-TTMEZONE = os.getenv("TTMEZONE", "UTC")
+TIMEZONE = os.getenv("TIMEZONE", "UTC")
 
 CONFIG_PATH = '/config'
 FEED_FILE = os.path.join(CONFIG_PATH, 'feeds.txt')
@@ -85,10 +85,10 @@ def get_posts_list(feed_list, START):
 
 
 def nicedate(dt):
-    return dt.astimezone(pytz.timezone(TTMEZONE)).strftime('%d %B %Y').strip('0')
+    return dt.astimezone(pytz.timezone(TIMEZONE)).strftime('%d %B %Y').strip('0')
 
 def nicehour(dt):
-    return dt.astimezone(pytz.timezone(TTMEZONE)).strftime('%I:%M&thinsp;%p').strip('0').lower()
+    return dt.astimezone(pytz.timezone(TIMEZONE)).strftime('%I:%M&thinsp;%p').strip('0').lower()
 
 
 def nicepost(post):
@@ -161,8 +161,9 @@ def do_one_round():
     # get all posts from starting point to now
     now = pytz.utc.localize(datetime.now())
     start = get_start(feed_file)
+    nice_start = start.astimezone(pytz.timezone(TIMEZONE)).strftime('%d %B %Y %I:%M %p')
 
-    logging.info(f"Collecting posts since {start}")
+    logging.info(f"Collecting posts since {nice_start}")
 
     posts = get_posts_list(load_feeds(), start)
     posts.sort()
