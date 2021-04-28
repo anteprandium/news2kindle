@@ -30,6 +30,7 @@ EMAIL_FROM = os.getenv("EMAIL_FROM")
 KINDLE_EMAIL = os.getenv("KINDLE_EMAIL")
 PANDOC = os.getenv("PANDOC_PATH", "/usr/bin/pandoc")
 PERIOD = int(os.getenv("UPDATE_PERIOD", 12))  # hours between RSS pulls
+TTMEZONE = os.getenv("TTMEZONE", "UTC")
 
 CONFIG_PATH = '/config'
 FEED_FILE = os.path.join(CONFIG_PATH, 'feeds.txt')
@@ -84,11 +85,10 @@ def get_posts_list(feed_list, START):
 
 
 def nicedate(dt):
-    return dt.strftime('%d %B %Y').strip('0')
-
+    return dt.astimezone(pytz.timezone(TTMEZONE)).strftime('%d %B %Y').strip('0')
 
 def nicehour(dt):
-    return dt.strftime('%I:%M&thinsp;%p').strip('0').lower()
+    return dt.astimezone(pytz.timezone(TTMEZONE)).strftime('%I:%M&thinsp;%p').strip('0').lower()
 
 
 def nicepost(post):
