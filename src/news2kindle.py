@@ -113,7 +113,7 @@ html_head = u"""<html>
   <meta name="apple-mobile-web-app-capable" content="yes" />
 <style>
 </style>
-<title>News from {nicedate} at {nicetime}</title>
+<title>News since {nicedate} {nicetime}</title>
 </head>
 <body>
 
