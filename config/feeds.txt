@@ -8,7 +8,6 @@ http://www.iresearch.cn/common/rss/column.xml
 http://wanqu.co/feed
 http://www.huxiu.com/rss/0.xml
 http://rss.slashdot.org/Slashdot/slashdotIt
-http://feeds.feedburner.com/TechCrunch/Microsoft
 http://googleblog.blogspot.com/atom.xml
 http://insights.thoughtworkers.org/feed/
 https://rsshub.app/21caijing/channel/business
@@ -23,8 +22,6 @@ http://app.hbrchina.org/?app=rss&controller=index&action=feed&catid=26
 http://www.infoq.com/cn/feed
 https://rsshub.app/xueqiu/hots
 https://rsshub.app/21caijing/channel/politics
-http://feeds.feedburner.com/techcrunchIt
-http://techcrunch.com/ecommerce/feed/
 http://feeds.geekpark.net/
 http://googlewebmastercentral.blogspot.com/atom.xml
 http://www.ruanyifeng.com/blog/atom.xml
@@ -34,7 +31,6 @@ http://feed.williamlong.info/
 http://www.un.org/zh/news/rss/rss_chinese.asp?subj=ED
 http://rss.slashdot.org/slashdot/eqWf
 http://feed.yixieshi.com/
-http://techcrunch.com/tag/fintech/feed/
 http://www.matrix67.com/blog/feed.asp
 http://mindhacks.cn/feed/
 http://daichuanqing.com/index.php/feed
