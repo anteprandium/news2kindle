@@ -97,6 +97,11 @@ def nicepost(post):
     thispost['nicetime'] = nicehour(thispost['time'])
     return thispost
 
+def nicestart(start):
+    nicestart = {}
+    nicestart['nicedate'] = nicedate(start)
+    nicestart['nicetime'] = nicehour(start)
+    return nicestart
 
 # <link rel="stylesheet" type="text/css" href="style.css">
 html_head = u"""<html>
@@ -108,7 +113,7 @@ html_head = u"""<html>
   <meta name="apple-mobile-web-app-capable" content="yes" />
 <style>
 </style>
-<title>THE DAILY NEWS</title>
+<title>THE DAILY NEWS on {nicedate} at {nicetime}</title>
 </head>
 <body>
 
@@ -161,9 +166,8 @@ def do_one_round():
     # get all posts from starting point to now
     now = pytz.utc.localize(datetime.now())
     start = get_start(feed_file)
-    nice_start = start.astimezone(pytz.timezone(TIMEZONE)).strftime('%d %B %Y %I:%M %p')
 
-    logging.info(f"Collecting posts since {nice_start}")
+    logging.info(f"Collecting posts since {start.astimezone(pytz.timezone(TIMEZONE))}")
 
     posts = get_posts_list(load_feeds(), start)
     posts.sort()
@@ -173,7 +177,7 @@ def do_one_round():
     if posts:
         logging.info("Compiling newspaper")
 
-        result = html_head + \
+        result = html_head.format(**nicestart(start)) + \
             u"\n".join([html_perpost.format(**nicepost(post))
                         for post in posts]) + html_tail
 
@@ -188,7 +192,6 @@ def do_one_round():
                               format="html",
                               outputfile=epubFile,
                               extra_args=["--standalone",
-                                          f"--epub-cover-image={COVER_FILE}",
                                           ])
         convert_to_mobi(epubFile, mobiFile)
 
